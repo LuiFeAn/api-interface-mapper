@@ -1,0 +1,9 @@
+{
+  "name": "api-rest-mapper",
+  "author": "Luis Fernando",
+  "description": "Ferramenta sendo desenvolvida a fim de auxiliar no mapeamento de interfaces em API REST. A fim de dinamizar o desenvolvimento de softwares",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.8"
+  }
+}
