@@ -87,23 +87,27 @@ function typeDistinct(key, value) {
 }
 
 function keyType(key, value) {
-  if (typeof value === "object") {
-    const typeOfArray = value.length;
-    if (typeOfArray) {
-      const sameType_ = sameType(value);
-      if (!sameType_) {
-        return typeDistinct(key, value);
+  const keyTypeLiterals = {
+    string: () => value,
+    number: () => value,
+    object: () => {
+      const typeOfArray = value.length;
+      if (typeOfArray) {
+        const sameType_ = sameType(value);
+        if (!sameType_) {
+          return typeDistinct(key, value);
+        }
+        return `${value[0]} []`;
       }
-      return `${typeof value[0]} []`;
-    }
-    if (!typeOfArray) {
-      return dataType(value, key);
-    }
-  }
-  return typeof value;
+      if (!typeOfArray) {
+        return dataType(value, key);
+      }
+    },
+  };
+  return typeof keyTypeLiterals[value]();
 }
 
-function dataType(data, endpoint) {
+function dataType(data, interface) {
   const dataEntries = Object.entries(data);
   let content = ``;
   dataEntries.forEach((item) => {
@@ -113,7 +117,7 @@ function dataType(data, endpoint) {
     ${key}:${type}
     `;
   });
-  const interfaceNameFormatter_ = interfaceNameFormatter(endpoint);
+  const interfaceNameFormatter_ = interfaceNameFormatter(interface);
   let dataInterface = `${interfaceTemplate} ${interfaceNameFormatter_} {
     ${content}
   }`;
@@ -121,15 +125,15 @@ function dataType(data, endpoint) {
   return interfaceNameFormatter_;
 }
 
-function writeInterfaces(data, endpoint) {
-  dataType(data, endpoint);
+function writeInterfaces(data, interface) {
+  dataType(data, interface);
   fs.writeFile(`${configFolder}/${endpoint}.ts`, rootInterfaceData, (err) => {
     if (err) throw err;
     console.log("Interfaces geradas com sucesso");
   });
 }
 
-async function makeRequestAndWriteInterfaces(endpoint) {
+async function makeRequests(endpoint) {
   const response = await httpClient.get(endpoint);
   const { data } = response;
   writeInterfaces(data, endpoint);
@@ -138,7 +142,7 @@ async function makeRequestAndWriteInterfaces(endpoint) {
 function bootstrap() {
   for (let i = 0; i < mapperConfigs.endpoints.length; i++) {
     const endpoint = mapperConfigs.endpoints[i];
-    makeRequestAndWriteInterfaces(endpoint);
+    makeRequests(endpoint);
   }
 }
 
