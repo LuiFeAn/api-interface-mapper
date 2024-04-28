@@ -99,9 +99,7 @@ function keyType(key, value) {
         }
         return `${value[0]} []`;
       }
-      if (!typeOfArray) {
-        return dataType(value, key);
-      }
+      return dataType(value, key);
     },
   };
   return typeof keyTypeLiterals[value]();
