@@ -50,22 +50,25 @@ function objectFilter(arr) {
   const keyFound = new Set();
   const distinctObjects = [];
   const simpleObjects = [];
-
   for (let i = 0; i < arr.length; i++) {
     const obj = arr[i];
     const typeOfObj = typeof obj;
-    if (typeOfObj != "object") {
-      if (!keyFound.has(typeOfObj)) {
-        keyFound.add(typeOfObj);
-        simpleObjects.push(typeOfObj);
-      }
-      return;
-    }
-    const keyOrder = Object.keys(obj).sort().join(",");
-    if (!keyFound.has(keyOrder)) {
-      distinctObjects.push(obj);
-      keyFound.add(keyOrder);
-    }
+    const objectFilterLiterals = {
+      true: () => {
+        if (!keyFound.has(typeOfObj)) {
+          keyFound.add(typeOfObj);
+          simpleObjects.push(typeOfObj);
+        }
+      },
+      false: () => {
+        const keyOrder = Object.keys(obj).sort().join(",");
+        if (!keyFound.has(keyOrder)) {
+          distinctObjects.push(obj);
+          keyFound.add(keyOrder);
+        }
+      },
+    };
+    objectFilterLiterals[!["object"].includes(typeOfObj)]();
   }
 
   return [...simpleObjects, ...distinctObjects];
@@ -79,7 +82,7 @@ function typeDistinct(key, value) {
       return item;
     }
     distinctCounty++;
-    const name = dataType(item, `${key}ChildrenObject${distinctCounty}`);
+    const name = dataType(item, `${key}${distinctCounty}`);
     return name;
   });
   let typeContent = results.map((item) => `${item}`).join(" | ");
@@ -89,8 +92,8 @@ function typeDistinct(key, value) {
 
 function keyType(key, value) {
   const keyTypeLiterals = {
-    string: () => value,
-    number: () => value,
+    string: () => typeof value,
+    number: () => typeof value,
     object: () => {
       const typeOfArray = value.length;
       if (typeOfArray) {
@@ -98,12 +101,12 @@ function keyType(key, value) {
         if (!sameType_) {
           return typeDistinct(key, value);
         }
-        return `${value[0]} []`;
+        return `${typeof value[0]} []`;
       }
       return dataType(value, key);
     },
   };
-  return typeof keyTypeLiterals[value]();
+  return keyTypeLiterals[typeof value]();
 }
 
 function interfaceContent(data) {
@@ -135,7 +138,7 @@ function dataType(data, interface) {
 
 function writeInterfaces(data, interface) {
   dataType(data, interface);
-  fs.writeFile(`${configFolder}/${endpoint}.ts`, rootInterfaceData, (err) => {
+  fs.writeFile(`${configFolder}/${interface}.ts`, rootInterfaceData, (err) => {
     if (err) throw err;
     console.log("Interfaces geradas com sucesso");
   });
