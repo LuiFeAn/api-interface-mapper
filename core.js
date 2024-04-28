@@ -51,7 +51,8 @@ function objectFilter(arr) {
   const distinctObjects = [];
   const simpleObjects = [];
 
-  arr.forEach((obj) => {
+  for (let i = 0; i < arr.length; i++) {
+    const obj = arr[i];
     const typeOfObj = typeof obj;
     if (typeOfObj != "object") {
       if (!keyFound.has(typeOfObj)) {
@@ -65,7 +66,7 @@ function objectFilter(arr) {
       distinctObjects.push(obj);
       keyFound.add(keyOrder);
     }
-  });
+  }
 
   return [...simpleObjects, ...distinctObjects];
 }
@@ -105,22 +106,31 @@ function keyType(key, value) {
   return typeof keyTypeLiterals[value]();
 }
 
-function dataType(data, interface) {
-  const dataEntries = Object.entries(data);
+function interfaceContent(data) {
   let content = ``;
-  dataEntries.forEach((item) => {
+  data.forEach((item) => {
     const [key, value] = item;
     const type = keyType(key, value);
     content += `
     ${key}:${type}
     `;
   });
+  return content;
+}
+
+function interfaceFactory(interface, content) {
   const interfaceNameFormatter_ = interfaceNameFormatter(interface);
   let dataInterface = `${interfaceTemplate} ${interfaceNameFormatter_} {
     ${content}
   }`;
   rootInterfaceData += `${dataInterface}\n\n`;
   return interfaceNameFormatter_;
+}
+
+function dataType(data, interface) {
+  const dataEntries = Object.entries(data);
+  const content = interfaceContent(dataEntries);
+  return interfaceFactory(interface, content);
 }
 
 function writeInterfaces(data, interface) {
